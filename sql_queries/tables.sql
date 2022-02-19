@@ -21,7 +21,7 @@ CREATE TABLE staff (
 
 CREATE TABLE app_login (
   username VARCHAR(50) PRIMARY KEY,
-  password VARCHAR(255) NOT NULL,
+  password VARCHAR(32) NOT NULL,
   staff_id VARCHAR(8) NOT NULL,
   FOREIGN KEY (staff_id) REFERENCES staff(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );

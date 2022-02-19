@@ -28,14 +28,14 @@ INSERT INTO staff VALUES
   ('ST000020', 'Robert', 'Anthony', 'M', '1987-07-09', '0751347867', 'No.78, Matale Street, Kandy', 'SECURITY');
 
 INSERT INTO app_login VALUES
-  ('admin', '$2a$09$GHH3CSI8tylALSHZ5BcbyOBWI08JFQ38Uzi6MY/ceaiof2z9FxiI.', 'ST000001'),
-  ('admin2', '$2a$09$GHH3CSI8tylALSHZ5BcbyOBWI08JFQ38Uzi6MY/ceaiof2z9FxiI.', 'ST000002'),
-  ('admin3', '$2a$09$GHH3CSI8tylALSHZ5BcbyOBWI08JFQ38Uzi6MY/ceaiof2z9FxiI.', 'ST000003'),
-  ('accountant1', '$2a$09$GHH3CSI8tylALSHZ5BcbyOBWI08JFQ38Uzi6MY/ceaiof2z9FxiI.', 'ST000004'),
-  ('accountant2', '$2a$09$GHH3CSI8tylALSHZ5BcbyOBWI08JFQ38Uzi6MY/ceaiof2z9FxiI.', 'ST000005'),
-  ('labstaff1', '$2a$09$GHH3CSI8tylALSHZ5BcbyOBWI08JFQ38Uzi6MY/ceaiof2z9FxiI.', 'ST000006'),
-  ('labstaff2', '$2a$09$GHH3CSI8tylALSHZ5BcbyOBWI08JFQ38Uzi6MY/ceaiof2z9FxiI.', 'ST000007'),
-  ('labstaff3', '$2a$09$GHH3CSI8tylALSHZ5BcbyOBWI08JFQ38Uzi6MY/ceaiof2z9FxiI.', 'ST000008');
+  ('admin', MD5('password'), 'ST000001'),
+  ('admin2', MD5('password'), 'ST000002'),
+  ('admin3', MD5('password'), 'ST000003'),
+  ('accountant1', MD5('password'), 'ST000004'),
+  ('accountant2', MD5('password'), 'ST000005'),
+  ('labstaff1', MD5('password'), 'ST000006'),
+  ('labstaff2', MD5('password'), 'ST000007'),
+  ('labstaff3', MD5('password'), 'ST000008');
 
 INSERT INTO room VALUES
   ('RM000001', 5, 'ST000010', 'ST000013'),
