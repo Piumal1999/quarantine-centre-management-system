@@ -1,0 +1,21 @@
+.dark-mode-plugin .dark-mode-plugin-button {
+  background: #fff;
+  border-radius: 50%;
+  bottom: 30px;
+  right: 30px;
+  font-size: 1.25rem;
+  z-index: 990;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+}
+
+.dark-version .dark-mode-plugin .btn.bg-gradient-dark,
+.dark-version .dark-mode-plugin .btn.btn-outline-dark {
+  color: #fff !important;
+  border: 1px solid #fff !important;
+}
+
+.dark-version .dark-mode-plugin .btn.active {
+  background: #fff !important;
+  color: #344767 !important;
+}
