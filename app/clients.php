@@ -1,7 +1,7 @@
 <?php
 include("session.php");
 
-$clients_query = "SELECT * FROM client";
+$clients_query = "SELECT * FROM client ORDER BY id";
 $clients = mysqli_query($db, $clients_query);
 ?>
 <!DOCTYPE html>
@@ -205,7 +205,7 @@ $clients = mysqli_query($db, $clients_query);
                           </span>
                         </td>
                         <td class="align-middle">
-                          <a href="#" class="font-weight-bold text-xs btn-tooltip" data-toggle="tooltip" data-original-title="Edit user">
+                          <a href="manage_client.php?id=<?php echo $row["id"] ?>" class="font-weight-bold text-xs btn-tooltip" data-toggle="tooltip" data-original-title="Edit user">
                             Edit
                           </a>
                         </td>
