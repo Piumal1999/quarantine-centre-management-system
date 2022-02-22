@@ -1,11 +1,12 @@
 <?php
 include("config.php");
 
+session_start();
+
 if (isset($_SESSION['staff_id'])) {
   header("location: dashboard.php");
+  exit;
 }
-
-session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $username = mysqli_real_escape_string($db, $_POST['username']);
