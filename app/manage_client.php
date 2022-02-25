@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $dietary_pref = mysqli_real_escape_string($db, $_POST['dietary_pref']);
 
   if ($isUpdate) {
-    if ($_POST['departure']) {
+    if (isset($_POST['departure'])) {
       $client_query = "UPDATE client SET
         departure_date = CURDATE()
         WHERE id = '$client_id'";
@@ -153,7 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <select class="form-control" name="assigned_room">
                       <option></option>
                       <?php while ($row = mysqli_fetch_array($rooms)) { ?>
-                        <option <?php if ($row["id"] == $client["assigned_room"]) echo "selected"; ?>>
+                        <option <?php if ($isUpdate && $row["id"] == $client["assigned_room"]) echo "selected"; ?>>
                           <?php echo $row["id"] ?>
                         </option>
                       <?php } ?>

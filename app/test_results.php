@@ -1,9 +1,9 @@
 <?php
 include("session.php");
-$active_tab = "client";
+$active_tab = "tests";
 
-$clients_query = "SELECT * FROM client ORDER BY id";
-$clients = mysqli_query($db, $clients_query);
+$tests_query = "SELECT client.first_name AS c_first_name, client.last_name AS c_last_name, client.id AS c_id, test.id, done_by, type, result, date FROM test, client WHERE test.done_to = client.id ORDER BY test.id";
+$test_results = mysqli_query($db, $tests_query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,9 +39,9 @@ $clients = mysqli_query($db, $clients_query);
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="dashboard.php">Admin Dashboard</a></li>
-            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Clients</li>
+            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Test Results</li>
           </ol>
-          <h6 class="font-weight-bolder text-white mb-0">Clients</h6>
+          <h6 class="font-weight-bolder text-white mb-0">Test Results</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <ul class="navbar-nav  justify-content-end">
@@ -64,26 +64,25 @@ $clients = mysqli_query($db, $clients_query);
         <div class="col-12">
           <div class="card mb-4">
             <div class="card-header pb-0">
-              <h6>All Clients</h6>
+              <h6>All Test Results</h6>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
               <div class="table-responsive p-0">
                 <table class="table align-items-center mb-0">
                   <thead>
                     <tr>
-                      <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Id</th>
+                      <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Test ID</th>
                       <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Client</th>
-                      <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Address/Contact</th>
-                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Arrival</th>
-                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Departure</th>
-                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Status</th>
-                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Room</th>
+                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Tested by</th>
+                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Test type</th>
+                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Result</th>
+                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Date</th>
                       <th class="opacity-7"></th>
                     </tr>
                   </thead>
                   <tbody>
                     <?php
-                    while ($row = mysqli_fetch_array($clients)) {
+                    while ($row = mysqli_fetch_array($test_results)) {
                     ?>
                       <tr>
                         <td>
@@ -95,60 +94,42 @@ $clients = mysqli_query($db, $clients_query);
                           <div class="d-flex px-3 py-1">
                             <div class="d-flex flex-column justify-content-center">
                               <h6 class="mb-0 text-sm">
-                                <?php echo $row["first_name"] . " " . $row["last_name"];
-                                if ($row["dietary_pref"] == "VEG") { ?>
-                                  <i class="fa-solid fa-leaf btn-tooltip" data-bs-toggle="tooltip" data-bs-placement="right" title="Vegetarian" data-animation="true"></i>
-                                <?php } ?>
+                                <?php echo $row["c_first_name"] . " " . $row["c_last_name"]; ?>
                               </h6>
                               <p class="text-xs mb-0">
-                                <?php
-                                echo (($row["gender"] == "M") ? "Male" : "Female") . ", ";
-                                echo date_diff(date_create($row["date_of_birth"]), date_create('today'))->y . " | ";
-                                if ($row["vaccination_status"] == "FULLY") {
-                                  echo "Fully Vaccinated";
-                                } else if ($row["vaccination_status"] == "PARTIALLY") {
-                                  echo "Partially Vaccinated";
-                                } else {
-                                  echo "Not Vaccinated";
-                                }
-                                ?>
+                                <?php echo $row["c_id"]; ?>
                               </p>
                             </div>
                           </div>
-                        </td>
-                        <td>
-                          <p class="text-xs font-weight-bold mb-0"><?php echo ($row["address"] == "") ? "N/A" : $row["address"] ?></p>
-                          <p class="text-xs mb-0"><?php echo ($row["contact_no"] == "") ? "N/A" : $row["contact_no"] ?></p>
+                        <td class="align-middle text-center">
+                          <p class="text-xs font-weight-bold mb-0"><?php echo $row["done_by"] ?></p>
                         </td>
                         <td class="align-middle text-center">
                           <span class="text-xs font-weight-bold">
-                            <?php echo $row["registered_date"] ?>
-                          </span>
-                        </td>
-                        <td class="align-middle text-center">
-                          <span class="text-xs font-weight-bold">
-                            <?php echo ($row["departure_date"] == "") ? "N/A" : $row["departure_date"]; ?>
+                            <?php echo $row["type"] ?>
                           </span>
                         </td>
                         <td class="align-middle text-center text-sm">
                           <?php
-                          if ($row["status"] == "NORMAL") {
+                          if ($row["result"] == "POSITIVE") {
+                            $badge_style = "bg-gradient-danger";
+                          } else if ($row["result"] == "NEGATIVE") {
                             $badge_style = "bg-gradient-success";
                           } else {
-                            $badge_style = "bg-gradient-danger";
+                            $badge_style = "bg-gradient-warning";
                           }
                           ?>
                           <span class="badge badge-sm <?php echo $badge_style ?> text-capitalize">
-                            <?php echo $row["status"] ?>
+                            <?php echo $row["result"] ?>
                           </span>
                         </td>
                         <td class="align-middle text-center">
                           <span class="text-xs font-weight-bold">
-                            <?php echo $row["assigned_room"] ?>
+                            <?php echo $row["date"]; ?>
                           </span>
                         </td>
                         <td class="align-middle">
-                          <a href="manage_client.php?id=<?php echo $row["id"] ?>" class="font-weight-bold text-xs btn-tooltip" data-toggle="tooltip" data-original-title="Edit user">
+                          <a href="manage_test.php?id=<?php echo $row["id"] ?>" class="font-weight-bold text-xs btn-tooltip" data-toggle="tooltip" data-original-title="Edit test">
                             Edit
                           </a>
                         </td>
