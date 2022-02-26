@@ -1,10 +1,112 @@
 <?php
 include("session.php");
 
-$room_query = "SELECT * FROM room ORDER BY id";
-$rooms = mysqli_query($db, $room_query);
+$cleaned_by_staffs_query = "SELECT id FROM staff WHERE type = 'CLEANING' ORDER BY id";
+$cleaned_by_staffs = mysqli_query($db, $cleaned_by_staffs_query);
 
-$get_client_assigned_room_query = "SELECT assigned_room FROM client ORDER BY id";
+$supported_by_staffs_query = "SELECT id FROM staff WHERE type = 'SUPPORTING' ORDER BY id";
+$supported_by_staffs = mysqli_query($db, $supported_by_staffs_query);
+
+if (isset($_GET['id'])) {
+  $room_id = $_GET['id'];
+  $get_room_query = "SELECT * FROM room WHERE id = '$room_id'";
+  $get_room_result = mysqli_query($db, $get_room_query);
+  if (mysqli_num_rows($get_room_result) == 1) {
+    $room = mysqli_fetch_array($get_room_result);
+    $isUpdate = true;
+  } else {
+    header("location: rooms.php");
+  }
+} else {
+  $prev_id_query = "SELECT id FROM room ORDER BY id DESC LIMIT 1";
+  $prev_id = mysqli_fetch_array(mysqli_query($db, $prev_id_query));
+  $room_id = "RM" . sprintf("%06d", substr($prev_id['id'], 2) + 1);
+  $isUpdate = false;
+}
+
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $capacity = mysqli_real_escape_string($db, $_POST['capacity']);
+  $cleaned_by = mysqli_real_escape_string($db, $_POST['cleaned_by']);
+  $supported_by = mysqli_real_escape_string($db, $_POST['supported_by']);
+
+  if($cleaned_by == "" && $supported_by =="" ){
+
+    if ($isUpdate) {
+      $room_query = "UPDATE room SET
+        capacity = '$capacity',
+        cleaned_by = NULL,
+        supported_by = NULL 
+        WHERE id = '$room_id'";
+    } else {
+      $room_query = "INSERT INTO room VALUES(
+        '$room_id', 
+        '$capacity', 
+        NULL, 
+        NULL)";
+    }
+
+  } elseif ($cleaned_by == "") {
+
+    if ($isUpdate) {
+      $room_query = "UPDATE room SET
+        capacity = '$capacity',
+        cleaned_by = NULL,
+        supported_by = '$supported_by' 
+        WHERE id = '$room_id'";
+    } else {
+      $room_query = "INSERT INTO room VALUES(
+        '$room_id', 
+        '$capacity', 
+        NULL, 
+        '$supported_by')";
+    }
+
+  }elseif ($supported_by == "") {
+
+    if ($isUpdate) {
+      $room_query = "UPDATE room SET
+        capacity = '$capacity',
+        cleaned_by = '$cleaned_by',
+        supported_by = NULL 
+        WHERE id = '$room_id'";
+    } else {
+      $room_query = "INSERT INTO room VALUES(
+        '$room_id', 
+        '$capacity', 
+        '$cleaned_by', 
+        NULL)";
+    }
+
+  }else {
+    
+    if ($isUpdate) {
+
+      $room_query = "UPDATE room SET
+        capacity = '$capacity',
+        cleaned_by = '$cleaned_by',
+        supported_by = '$supported_by' 
+        WHERE id = '$room_id'";
+    } else {
+      $room_query = "INSERT INTO room VALUES(
+        '$room_id', 
+        '$capacity', 
+        '$cleaned_by', 
+        '$supported_by')";
+    }
+
+  }
+  
+
+  
+
+  try {
+    $room_result = mysqli_query($db, $room_query);
+    header("location: rooms.php");
+  } catch (Exception) {
+    die("Error Occured!");
+  }
+}
 
 ?>
 <!DOCTYPE html>
@@ -53,7 +155,7 @@ $get_client_assigned_room_query = "SELECT assigned_room FROM client ORDER BY id"
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="clients.php">
+          <a class="nav-link " href="#">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="fa fa-user-group text-warning text-sm opacity-10"></i>
             </div>
@@ -104,10 +206,10 @@ $get_client_assigned_room_query = "SELECT assigned_room FROM client ORDER BY id"
       <div class="container-fluid py-1 px-3">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="dashboard.php">Admin Dashboard</a></li>
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Admin Dashboard</a></li>
             <li class="breadcrumb-item text-sm text-white active" aria-current="page">Rooms</li>
           </ol>
-          <h6 class="font-weight-bolder text-white mb-0">Rooms</h6>
+          <h6 class="font-weight-bolder text-white mb-0">Update Rooms</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <ul class="navbar-nav  justify-content-end">
@@ -127,72 +229,63 @@ $get_client_assigned_room_query = "SELECT assigned_room FROM client ORDER BY id"
     <!-- End Navbar -->
     <div class="container-fluid py-4">
       <div class="row">
-        <div class="col-12">
+        <div class="col-lg-8">
           <div class="card mb-4">
             <div class="card-header pb-0">
-              <h6>All Rooms</h6>
+              <h6>Register new room</h6>
             </div>
-            <div class="card-body px-0 pt-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-xxs font-weight-bolder opacity-7">Room</th>
-                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">Capacity</th>
-                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">cleaned_by</th>
-                      <th class="text-center text-uppercase text-xxs font-weight-bolder opacity-7">supported_by</th>
-                      <th class="opacity-7"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    while ($row = mysqli_fetch_array($rooms)) {
-                    ?>
-                      <tr>
-                        <td>
-                          <div class="d-flex px-3 py-1">
-                            <div class="d-flex flex-column justify-content-center">
-                              <h6 class="mb-0 text-sm">
-                                <?php echo $row["id"];?>
-                              </h6>
-                              <p class="text-xs mb-0">
-                              <?php $count = 0; 
-                              $clients_assigned_room = mysqli_query($db, $get_client_assigned_room_query);
-                              while ($clients_assigned_room_row = mysqli_fetch_array($clients_assigned_room))
-                              {if ($clients_assigned_room_row['assigned_room'] == $row["id"]) {$count++; }}
-                              ?>
-                              <?php echo 'number of client in the room :'.$count;?>
-                            </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td class="align-middle text-center">
-                          <span class="text-xs font-weight-bold">
-                            <?php echo $row["capacity"] ?>
-                          </span>
-                        </td>
-                        <td class="align-middle text-center">
-                          <span class="text-xs font-weight-bold">
-                            <?php echo ($row["cleaned_by"] == "") ? "N/A" : $row["cleaned_by"]; ?>
-                          </span>
-                        </td>
-                        <td class="align-middle text-center">
-                          <span class="text-xs font-weight-bold">
-                            <?php echo ($row["supported_by"] == "") ? "N/A" : $row["supported_by"]; ?>
-                          </span>
-                        </td>
-                        <td class="align-middle">
-                          <a href="manage_room.php?id=<?php echo $row["id"] ?>" class="font-weight-bold text-xs btn-tooltip" data-toggle="tooltip" data-original-title="Edit user">
-                            Edit
-                          </a>
-                        </td>
-                      </tr>
-                    <?php
-                    }
-                    ?>
-                  </tbody>
-                </table>
-              </div>
+            <div class="card-body pt-0 pb-2">
+              <form action="" method="POST">
+                <div class="row form-group">
+                  <div class="col-md-6">
+                    <label>Room Id</label>
+                    <input type="text" class="form-control" name="room_id" value="<?php echo $room_id ?>" disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Capacity</label>
+                    <input type="number" class="form-control" name="capacity" placeholder="5" <?php if ($isUpdate) echo "value='" . $room["capacity"] . "'"; ?>>
+                  </div>
+                </div>
+                <div class="row form-group">
+                  <div class="col-md-6">
+                    <label>cleaned_by</label>
+                    <select class="form-control" name="cleaned_by">
+                      <option></option>
+                      <?php while ($cleaned_by_row = mysqli_fetch_array($cleaned_by_staffs)) { 
+                        if($isUpdate){ ?>
+                          <option <?php if ($cleaned_by_row["id"] == $room["cleaned_by"]) echo "selected"; ?>>
+                          <?php echo $cleaned_by_row["id"]; ?>
+                        <?php }else{?>
+                          <option>
+                          <?php echo $cleaned_by_row["id"]; 
+                        }?>
+                        </option>
+                      <?php } ?>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label>supported_by</label>
+                    <select class="form-control" name="supported_by">
+                      <option></option>
+                      <?php while ($supported_by_row = mysqli_fetch_array($supported_by_staffs)) { 
+                        if($isUpdate){ ?>
+                          <option <?php if ($supported_by_row["id"] == $room["supported_by"]) echo "selected"; ?>>
+                          <?php echo $supported_by_row["id"]; ?>
+                        <?php }else{?>
+                          <option>
+                          <?php echo $supported_by_row["id"]; 
+                        }?>
+                        </option>
+                      <?php } ?>
+                    </select>
+                  </div>
+                </div>
+                <input type="submit" class="btn bg-gradient-primary" value="<?php echo $isUpdate ? "Save" : "Submit" ?>">
+                <!-- departue button input -->
+                <?php //if ($isUpdate) { ?>
+                  <!--input type="submit" class="btn bg-gradient-danger" name="departure" value="Mark as departured"-->
+                <?php //} ?>
+              </form>
             </div>
           </div>
         </div>
